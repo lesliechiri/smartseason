@@ -11,7 +11,7 @@ function Login() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try{
-            const res = await api.post('/token/', { username, password });
+            const res = await api.post('/api/token/', { username, password });
             localStorage.setItem('access_token', res.data.access);
             localStorage.setItem('refresh_token', res.data.refresh);
             navigate('/dashboard');
