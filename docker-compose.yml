@@ -1,0 +1,55 @@
+
+version: '3.9'
+services:
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: shamba
+      POSTGRES_USER: shamba
+      POSTGRES_PASSWORD: shamba123
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+    ports:
+      - "5432:5432"
+
+  backend:
+    build: ./backend/myproject
+    command: sh -c "python manage.py migrate && gunicorn myproject.wsgi:application --bind 0.0.0.0:8000"
+
+    volumes:
+      - ./backend/myproject:/app
+
+    ports:
+      - "8000:8000"
+
+    environment:
+      DATABASE_URL: postgres://shamba:shamba123@db:5432/shamba
+      DJANGO_SECRET_KEY: '$#+&31ip3+%%6n)1_qe8!=4c=$3b0f^x8=1p13zx$&tvyq!+rr'
+      DEBUG: "0"
+      ALLOWED_HOSTS: "localhost,127.0.0.1,backend"
+
+    depends_on:
+      - db
+
+  frontend:
+    build: ./frontend
+
+    ports:
+      - "3000:5173"
+
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules 
+
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+
+
+    depends_on:
+      - backend
+
+      
+volumes:
+  postgres_data:                          
